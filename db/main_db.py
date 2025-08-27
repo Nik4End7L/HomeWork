@@ -1,13 +1,13 @@
 import sqlite3
 from db import queries
 from config import db_path
+import datetime
 
 
 def init_db():
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute(queries.CREATE_TASKS)
-    # cursor.execute(queries.TEST_CREATE)
     print('База данных подключена!')
     conn.commit()
     conn.close()
@@ -16,7 +16,8 @@ def init_db():
 def add_task(task):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    cursor.execute(queries.INSERT_TASK, (task,))
+    now = datetime.datetime.now().isoformat(timespec="seconds")
+    cursor.execute(queries.INSERT_TASK, (task, now))
     conn.commit()
     task_id = cursor.lastrowid
     conn.close()
@@ -51,10 +52,11 @@ def update_task(task_id, new_task=None, completed=None):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
-    if new_task is not None:
+    if new_task is not None and completed is not None:
+        cursor.execute("UPDATE tasks SET task = ?, completed = ? WHERE id = ?", (new_task, completed, task_id))
+    elif new_task is not None:
         cursor.execute(queries.UPDATE_TASK, (new_task, task_id))
-    
-    if completed is not None:
+    elif completed is not None:
         cursor.execute("UPDATE tasks SET completed = ? WHERE id = ?", (completed, task_id))
 
     conn.commit()
