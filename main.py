@@ -89,15 +89,27 @@ def main(page: ft.Page):
     add_button = ft.ElevatedButton('ADD', on_click=add_task)
 
     filter_buttons = ft.Row(controls=[
-        ft.ElevatedButton("Все", on_click=lambda e: set_filter('all')),
-        ft.ElevatedButton("Завершенные", on_click=lambda e: set_filter('completed')),
-        ft.ElevatedButton("Незавершенные", on_click=lambda e: set_filter('uncompleted'))
+        ft.ElevatedButton("All", on_click=lambda e: set_filter('all')),
+        ft.ElevatedButton("Completed", on_click=lambda e: set_filter('completed')),
+        ft.ElevatedButton("UnCompleted", on_click=lambda e: set_filter('uncompleted'))
     ], alignment=ft.MainAxisAlignment.SPACE_EVENLY)
+
+    def clear_completed_tasks(_):
+        tasks = main_db.get_task('completed')
+        for task_id, _, _, _ in tasks:
+            main_db.delete_task(task_id)
+        load_task()
+
+    clear_completed_button = ft.ElevatedButton(
+        "Clear Completed",
+        on_click=clear_completed_tasks
+    )
 
     page.add(ft.Column([
         ft.Row([task_input, add_button]),
         warning_text,
         filter_buttons,
+        clear_completed_button,  
         task_list
     ]))
 
